@@ -1,0 +1,10 @@
+# Auto commit after a change
+[git]
+    autoCommit = true
+    autoPush = true
+
+# After using 'chezmoi edit' to edit a config apply it right away
+[data]
+editPostCommand = "chezmoi apply"
+
+
