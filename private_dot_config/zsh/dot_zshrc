@@ -71,7 +71,7 @@ export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 # Key bindings for fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-if command -v starship >/dev/null 2>&1; then
+if ! command -v starship >/dev/null 2>&1; then
     brew install starship
 fi
 eval "$(starship init zsh)"
