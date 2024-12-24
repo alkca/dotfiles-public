@@ -1,7 +1,49 @@
-if [[ "$(uname)" == "Linux" ]]; then
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+install_starship() {
+    if [[ $USE_ALTERNATIVE_INSTALL -eq 1 ]]; then
+        echo "Installing starship without brew..."
+        curl -sS https://starship.rs/install.sh | sh
+    else
+        brew install starship
+    fi
+}
+
+install_neovim() {
+    if [[ $USE_ALTERNATIVE_INSTALL -eq 1 ]]; then
+        echo "Installing neovim without brew..."
+        if [[ "$(uname)" == "Linux" ]]; then
+            # For Linux: Using AppImage
+            curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+            chmod u+x nvim.appimage
+            sudo mv nvim.appimage /usr/local/bin/nvim
+        else
+            # For macOS: Using direct download
+            curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-macos.tar.gz
+            tar xzf nvim-macos.tar.gz
+            sudo mv nvim-macos/bin/nvim /usr/local/bin/
+            rm -rf nvim-macos.tar.gz nvim-macos
+        fi
+    else
+        brew install neovim
+    fi
+}
+
+
+USE_ALTERNATIVE_INSTALL=0
+
+# Check if brew exists
+if ! command_exists brew; then
+    USE_ALTERNATIVE_INSTALL=1
 else
+    if [[ "$(uname)" == "Linux" ]]; then
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    else
         eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
 fi
 
 # Set the directory we want to store zinit and plugins
@@ -70,15 +112,11 @@ export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 # Key bindings for fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-if ! command -v starship >/dev/null 2>&1; then
-    brew install starship
-fi
+install_starship
 eval "$(starship init zsh)"
 
 # Neovim setup
-if ! command -v nvim >/dev/null 2>&1; then
-    brew install neovim
-fi
+install_neovim
 export EDITOR=nvim
 export VISUAL=nvim
 
