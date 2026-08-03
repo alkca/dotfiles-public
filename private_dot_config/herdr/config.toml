@@ -1,0 +1,13 @@
+onboarding = false
+
+[experimental]
+pane_history = false
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[keys]
+prefix = "ctrl+a"
+previous_tab = "alt+left"
+next_tab = "alt+right"

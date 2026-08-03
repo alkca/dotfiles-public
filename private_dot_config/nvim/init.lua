@@ -110,13 +110,23 @@ vim.opt.mouse = 'a'
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
--- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
-vim.schedule(function()
-  vim.opt.clipboard = 'unnamedplus'
-end)
+local function is_ssh()
+  return vim.env.SSH_CONNECTION ~= nil or vim.env.SSH_CLIENT ~= nil or vim.env.SSH_TTY ~= nil or vim.env.WSL_DISTRO_NAME ~= nil
+end
+
+if is_ssh() then
+  vim.g.clipboard = {
+    name = 'osc52',
+    copy = {
+      ['+'] = require('vim.ui.clipboard.osc52').copy '+',
+      ['*'] = require('vim.ui.clipboard.osc52').copy '*',
+    },
+    paste = {
+      ['+'] = require('vim.ui.clipboard.osc52').paste '+',
+      ['*'] = require('vim.ui.clipboard.osc52').paste '*',
+    },
+  }
+end
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -884,28 +894,36 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+    config = function()
+      local languages = {
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+      }
+
+      require('nvim-treesitter').install(languages)
+
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(args)
+          pcall(vim.treesitter.start, args.buf)
+
+          if vim.bo[args.buf].filetype ~= 'ruby' then
+            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
+    end,
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the

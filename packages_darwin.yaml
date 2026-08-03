@@ -1,0 +1,56 @@
+# macOS package definitions
+# This file defines packages for macOS systems
+
+# Native package manager (none for macOS - using Homebrew as primary)
+native:
+  # Xcode Command Line Tools are handled separately in setup script
+  lite: []
+  full: []
+  gui: []
+
+# Homebrew packages
+homebrew:
+  taps: []
+
+  lite:
+    - git
+    - curl
+    - wget
+    - neovim
+    - tree-sitter-cli
+    - starship
+    - chezmoi
+    - zsh
+    - fzf
+    - ripgrep
+    - eza
+    - bat
+    - git-delta
+    - gitleaks
+    - zinit
+    - mas # Mac App Store CLI
+    - uv
+    - gnupg
+    - pinentry-mac
+
+  full:
+    - fd
+    - btop
+    - fastfetch
+    - htop
+    - tmux
+    - zoxide
+
+  gui:
+    - visual-studio-code
+    - iterm2
+
+# Custom packages (require special installation scripts)
+custom:
+  lite: []
+
+  full:
+    - gcloud
+    - shell-gpt
+
+  gui: []

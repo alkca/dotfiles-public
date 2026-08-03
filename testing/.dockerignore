@@ -1,0 +1,8 @@
+# Deny the entire testing tree by default. Explicitly allow only the files
+# needed to build the two test images.
+*
+!test-chezmoi.sh
+!ubuntu/
+!ubuntu/Dockerfile
+!arch/
+!arch/Dockerfile

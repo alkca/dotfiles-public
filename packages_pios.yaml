@@ -1,0 +1,62 @@
+# Raspberry Pi OS package definitions
+# This file defines packages for Raspberry Pi OS systems
+
+# Native package manager (apt)
+native:
+  lite:
+    - build-essential
+    - curl
+    - wget
+    - file
+    - git
+    - procps
+    - ca-certificates
+    - gnupg
+    - lsb-release
+    - software-properties-common
+    - zsh
+    - python3
+    # Note: 'uv' is included in Homebrew packages below. If installing 'uv' outside Homebrew, ensure 'python3-pip' is available, as 'uv' may require pip for installation. Alternatively, use Homebrew to avoid pip dependency.
+
+  full: []
+
+  gui:
+    - firefox-esr
+    - code
+
+# Homebrew packages (primary package manager for development tools)
+homebrew:
+  taps: []
+
+  lite:
+    - neovim
+    - tree-sitter-cli
+    - starship
+    - chezmoi
+    - ripgrep
+    - eza
+    - bat
+    - git-delta
+    - gitleaks
+    - zinit
+    - uv
+
+  full:
+    - fd
+    - btop
+    - fastfetch
+    - htop
+    - tmux
+    - zoxide
+
+  gui: [] # Most GUI apps handled by native package manager on Pi OS
+
+# Custom packages (require special installation scripts)
+custom:
+  lite: []
+
+  full:
+    - gcloud
+    - shell-gpt
+
+  gui: []

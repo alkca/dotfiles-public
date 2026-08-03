@@ -1,0 +1,59 @@
+# Arch Linux package definitions
+# This file defines packages for Arch Linux systems
+
+# Native package manager (pacman)
+native:
+  lite:
+    - base-devel
+    - curl
+    - wget
+    - file
+    - git
+    - procps-ng
+    - which
+    - sudo
+    - zsh
+
+  full: []
+
+  gui:
+    - firefox
+    - code
+
+# Homebrew packages (primary package manager for development tools)
+homebrew:
+  taps: []
+
+  lite:
+    - neovim
+    - tree-sitter-cli
+    - starship
+    - chezmoi
+    - fzf
+    - ripgrep
+    - eza
+    - bat
+    - git-delta
+    - gitleaks
+    - zinit
+    - uv
+
+  full:
+    - fd
+    - btop
+    - fastfetch
+    - htop
+    - tmux
+    - zoxide
+
+  gui: []
+
+# Custom packages (require special installation scripts)
+custom:
+  lite: []
+
+  full:
+    - gcloud
+    - shell-gpt
+
+  gui: []

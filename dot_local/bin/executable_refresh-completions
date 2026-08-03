@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+# refresh-completions — regenerate static zsh completion files on $FPATH.
+#
+# Single source of truth for every "pure" `<tool> completion zsh` generator.
+# Writes ~/.config/zsh/completions/_<tool> and busts the compinit cache so the
+# new definitions load on next shell start.
+#
+# Add a tool by appending a "name|generator command" line to the heredoc below.
+# Only tools that emit a self-contained completion script belong here — shell
+# integrations that also set keybindings/env (fzf, zoxide, starship, gcloud,
+# `fnm env`) must stay as runtime `eval`/`source` lines in .zshrc.
+#
+# Run it manually after upgrading tools, or let the chezmoi package-install
+# scripts call it when a new package is added.
+
+set -euo pipefail
+
+COMP_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/completions"
+mkdir -p "$COMP_DIR"
+# zsh's compinit flags group/world-writable dirs on $FPATH as insecure
+# (see `compaudit`), regardless of umask when the dir was created.
+chmod 755 "$COMP_DIR"
+
+changed=0
+
+while IFS='|' read -r cmd gen; do
+    # Skip blank lines / comments in the list below.
+    [ -z "${cmd// /}" ] && continue
+    case "$cmd" in \#*) continue ;; esac
+
+    command -v "$cmd" >/dev/null 2>&1 || continue
+
+    tmp="$(mktemp)"
+    if eval "$gen" >"$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+        target="$COMP_DIR/_$cmd"
+        if ! cmp -s "$tmp" "$target"; then
+            mv "$tmp" "$target"
+            echo "updated _$cmd"
+            changed=1
+        else
+            rm -f "$tmp"
+        fi
+    else
+        rm -f "$tmp"
+        echo "warn: failed to generate completion for '$cmd'" >&2
+    fi
+done <<'TOOLS'
+kubectl|kubectl completion zsh
+velero|velero completion zsh
+chezmoi|chezmoi completion zsh
+docker|docker completion zsh
+deno|deno completions zsh
+fnm|fnm completions --shell zsh
+TOOLS
+
+# One-time cleanup: legacy filename from before this script existed.
+rm -f "$COMP_DIR/_deno.zsh"
+
+if [ "$changed" -eq 1 ]; then
+    # `compinit -C` trusts .zcompdump and won't rescan $FPATH, so clear the
+    # cache to force a rebuild (and pick up new files) on next shell start.
+    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/.zcompdump"* "$HOME/.zcompdump"* 2>/dev/null || true
+    echo "cleared .zcompdump — start a new shell to load updated completions"
+else
+    echo "completions already up to date"
+fi

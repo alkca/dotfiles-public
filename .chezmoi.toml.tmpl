@@ -1,0 +1,58 @@
+{{- $installType := "lite" -}}
+{{- $osPackageManager := "" -}}
+{{- $brewPrefix := "" -}}
+
+{{- /* Detect OS and set package manager */ -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $osPackageManager = "brew" -}}
+{{-   $brewPrefix = "/opt/homebrew" -}}
+{{- else if eq .chezmoi.os "linux" -}}
+{{-   if hasKey .chezmoi.osRelease "id" -}}
+{{-     if eq .chezmoi.osRelease.id "ubuntu" -}}
+{{-       $osPackageManager = "apt" -}}
+{{-     else if eq .chezmoi.osRelease.id "debian" -}}
+{{-       $osPackageManager = "apt" -}}
+{{-     else if eq .chezmoi.osRelease.id "arch" -}}
+{{-       $osPackageManager = "pacman" -}}
+{{-     else if eq .chezmoi.osRelease.id "raspbian" -}}
+{{-       $osPackageManager = "apt" -}}
+{{-     else -}}
+{{-       $osPackageManager = "apt" -}}
+{{-     end -}}
+{{-   else -}}
+{{-     $osPackageManager = "apt" -}}
+{{-   end -}}
+{{-   $brewPrefix = "/home/linuxbrew/.linuxbrew" -}}
+{{- end -}}
+
+{{- /* Interactive prompts for install type */ -}}
+{{- $installType = promptChoiceOnce . "installType" "What type of installation would you like?" (list "lite" "full" "gui") "lite" -}}
+
+
+[git]
+    autoCommit = false
+    autoPush = false
+
+[edit]
+    apply = true
+
+[merge]
+    command = "nvim"
+    args = ["-d", "{{ "{{ .Destination }}" }}", "{{ "{{ .Source }}" }}", "{{ "{{ .Target }}" }}"]
+
+[data.install]
+    type = {{ $installType | quote }}
+    os_package_manager = {{ $osPackageManager | quote }}
+    brew_prefix = {{ $brewPrefix | quote }}
+
+[data.system]
+    os = {{ .chezmoi.os | quote }}
+    arch = {{ .chezmoi.arch | quote }}
+    hostname = {{ .chezmoi.hostname | quote }}
+{{- if hasKey .chezmoi "osRelease" }}
+
+[data.system.os_release]
+{{-   range $key, $value := .chezmoi.osRelease }}
+    {{ $key }} = {{ $value | quote }}
+{{-   end }}
+{{- end }}

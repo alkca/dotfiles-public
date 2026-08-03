@@ -3,8 +3,17 @@ palette = "catppuccin_mocha"
 right_format = """$all"""
 
 [directory]
-truncation_length = 8
-truncation_symbol = '.../'
+truncation_length = 3
+truncation_symbol = '…/'
+truncate_to_repo = true
+style = "bold lavender"
+read_only = " 󰌾"
+read_only_style = "red"
+repo_root_style = "bold mauve"
+home_symbol = "~"
+
+[directory.substitutions]
+"~/dev" = " dev"
 
 [kubernetes]
 format = '[$context \($namespace\)]($style) '
@@ -12,6 +21,10 @@ disabled = false
 
 [gcloud]
 disabled = true
+
+[cmd_duration]
+show_milliseconds = true
+
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"

@@ -1,0 +1,150 @@
+{{- if eq .chezmoi.arch "amd64" -}}
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "arch") -}}
+#!/bin/bash
+# Install packages for Arch Linux
+# This script runs whenever packages_arch.yaml changes
+
+set -euo pipefail
+
+# Package list file checksum (triggers re-run when packages change)
+# package hash: {{ include "packages_arch.yaml" | sha256sum }}
+
+echo "🏹 Installing packages for Arch Linux with install type '{{ .install.type }}'..."
+
+PACKAGE_FILE="{{ .chezmoi.sourceDir }}/packages_arch.yaml"
+BREW_PREFIX="/home/linuxbrew/.linuxbrew"
+
+# Check if package file exists
+if [[ ! -f "$PACKAGE_FILE" ]]; then
+    echo "❌ Package file not found: $PACKAGE_FILE"
+    exit 1
+fi
+
+echo "📋 Using package file: $PACKAGE_FILE"
+echo "🎯 Install type: {{ .install.type }}"
+
+# Install native packages first via pacman
+echo "🔧 Installing native packages via pacman..."
+
+# Update package database
+sudo pacman -Sy --noconfirm
+
+# Ensure yq is available for YAML parsing
+if ! command -v yq &>/dev/null; then
+    echo "📥 Installing yq for YAML parsing..."
+    brew install yq
+fi
+
+# Parse YAML and install packages
+NATIVE_PACKAGES=$(yq eval '.native.lite[]' "$PACKAGE_FILE" 2>/dev/null || echo "")
+{{- if or (eq .install.type "full") (eq .install.type "gui") }}
+NATIVE_PACKAGES="$NATIVE_PACKAGES $(yq eval '.native.full[]' "$PACKAGE_FILE" 2>/dev/null || echo "")"
+{{- end }}
+{{- if eq .install.type "gui" }}
+NATIVE_PACKAGES="$NATIVE_PACKAGES $(yq eval '.native.gui[]' "$PACKAGE_FILE" 2>/dev/null || echo "")"
+{{- end }}
+
+if [[ -n "$NATIVE_PACKAGES" ]]; then
+    echo "Installing native packages: $NATIVE_PACKAGES"
+    sudo pacman -S --needed --noconfirm $NATIVE_PACKAGES
+fi
+
+echo "✅ Native packages installed"
+
+# Ensure Homebrew is installed and available
+if ! command -v brew &>/dev/null; then
+    echo "📥 Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Update Homebrew
+echo "🔄 Updating Homebrew..."
+brew update
+
+# Install Homebrew taps
+echo "🍺 Adding Homebrew taps..."
+TAPS=$(yq eval '.homebrew.taps[]' "$PACKAGE_FILE" 2>/dev/null || echo "")
+for tap in $TAPS; do
+    if [[ -n "$tap" ]]; then
+        brew tap "$tap" 2>/dev/null || echo "⚠️  Tap $tap already exists or failed to add"
+    fi
+done
+
+# Install Homebrew packages
+echo "🍺 Installing Homebrew packages..."
+
+# Get packages based on install type
+BREW_PACKAGES=$(yq eval '.homebrew.lite[]' "$PACKAGE_FILE" 2>/dev/null || echo "")
+{{- if or (eq .install.type "full") (eq .install.type "gui") }}
+BREW_PACKAGES="$BREW_PACKAGES $(yq eval '.homebrew.full[]' "$PACKAGE_FILE" 2>/dev/null || echo "")"
+{{- end }}
+{{- if eq .install.type "gui" }}
+BREW_PACKAGES="$BREW_PACKAGES $(yq eval '.homebrew.gui[]' "$PACKAGE_FILE" 2>/dev/null || echo "")"
+{{- end }}
+
+if [[ -n "$BREW_PACKAGES" ]]; then
+    echo "Installing Homebrew packages: $BREW_PACKAGES"
+    for package in $BREW_PACKAGES; do
+        if [[ -n "$package" ]]; then
+            if ! brew list "$package" &>/dev/null; then
+                echo "📦 Installing $package..."
+                brew install "$package" || echo "⚠️  Failed to install $package"
+            else
+                echo "✅ $package already installed"
+            fi
+        fi
+    done
+fi
+
+# Install custom packages
+echo "🔧 Installing custom packages..."
+
+# Get custom packages based on install type
+CUSTOM_PACKAGES=$(yq eval '.custom.lite[]' "$PACKAGE_FILE" 2>/dev/null || echo "")
+{{- if or (eq .install.type "full") (eq .install.type "gui") }}
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES $(yq eval '.custom.full[]' "$PACKAGE_FILE" 2>/dev/null || echo "")"
+{{- end }}
+{{- if eq .install.type "gui" }}
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES $(yq eval '.custom.gui[]' "$PACKAGE_FILE" 2>/dev/null || echo "")"
+{{- end }}
+
+if [[ -n "$CUSTOM_PACKAGES" ]]; then
+    echo "Installing custom packages: $CUSTOM_PACKAGES"
+    for package in $CUSTOM_PACKAGES; do
+        if [[ -n "$package" ]]; then
+            CUSTOM_SCRIPT="{{ .chezmoi.sourceDir }}/scripts/custom/${package}-arch.sh"
+            if [[ -f "$CUSTOM_SCRIPT" ]]; then
+                echo "🔧 Running custom installation for $package..."
+                "$CUSTOM_SCRIPT" || echo "⚠️  Failed to install custom package $package"
+            else
+                echo "⚠️  Custom installation script not found: $CUSTOM_SCRIPT"
+            fi
+        fi
+    done
+fi
+
+echo "✅ Custom packages processed"
+
+# Post-installation setup
+echo "🔧 Running post-installation setup..."
+
+# Setup zinit directory if zsh is installed
+if command -v zsh &>/dev/null; then
+    ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+    if [[ ! -d "$ZINIT_HOME" ]]; then
+        echo "📥 Setting up zinit directory..."
+        mkdir -p "$(dirname "$ZINIT_HOME")"
+    fi
+fi
+
+# Regenerate static shell completions for any newly installed tools
+if [[ -x "$HOME/.local/bin/refresh-completions" ]]; then
+    echo "🔧 Refreshing shell completions..."
+    "$HOME/.local/bin/refresh-completions" || echo "⚠️  Completion refresh failed"
+fi
+
+echo "✅ Arch Linux package installation complete!"
+echo "🎉 Arch Linux setup with '{{ .install.type }}' install type finished successfully!"
+{{- end }}
+{{- end }}

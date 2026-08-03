@@ -1,0 +1,20 @@
+# Chezmoi ignore file
+# Files and patterns listed here will not be copied to the home directory
+
+# Package definition files (these are source files, not target files)
+packages_*.yaml
+
+# Documentation files (these stay in the source directory)
+PACKAGES.md
+
+# Testing directory
+testing/
+
+# Roo configuration
+.roo/
+
+# Claude plugin state (managed per-machine by Claude Code; enabledPlugins in settings.json is the source of truth)
+.claude/plugins/installed_plugins.json
+.claude/plugins/known_marketplaces.json
+# Package installer helper scripts (source assets only)
+scripts/custom/

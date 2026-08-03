@@ -1,0 +1,61 @@
+# Ubuntu package definitions
+# This file defines packages for Ubuntu systems
+
+# Native package manager (apt)
+native:
+  lite:
+    - build-essential
+    - curl
+    - wget
+    - file
+    - git
+    - procps
+    - ca-certificates
+    - gnupg
+    - lsb-release
+    - software-properties-common
+    - zsh
+
+  full: []
+
+  gui:
+    - firefox
+    - gnome-tweaks
+
+# Homebrew packages (primary package manager for development tools)
+homebrew:
+  taps: []
+
+  lite:
+    - neovim
+    - tree-sitter-cli
+    - starship
+    - chezmoi
+    - fzf
+    - ripgrep
+    - eza
+    - bat
+    - git-delta
+    - gitleaks
+    - zinit
+    - uv
+
+  full:
+    - fd
+    - btop
+    - fastfetch
+    - htop
+    - tmux
+    - zoxide
+
+  gui: []
+
+# Custom packages (require special installation scripts)
+custom:
+  lite: []
+
+  full:
+    - gcloud
+    - shell-gpt
+
+  gui: []

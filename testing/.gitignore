@@ -1,0 +1,12 @@
+# Local test credentials and generated authentication material must never be
+# committed, even though the test harness does not consume them.
+*.key
+*.pem
+*.p12
+*.pfx
+.env
+.env.*
+auth.json
+credentials.*
+secret*
+token*

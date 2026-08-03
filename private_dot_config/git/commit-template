@@ -1,0 +1,16 @@
+# Select a line below and start typing your message:
+#
+# feat: ✨       A new feature
+# fix: 🐛        A bug fix
+# chore: 🧹      Routine tasks like cleanup, tooling, or config changes
+# docs: 📚       Documentation changes only
+# refactor: ♻️   Code changes that neither fix bugs nor add features
+# test: 🧪       Adding or updating tests
+# style: 🎨      Formatting, white-space, linting — no code logic changes
+# ci: 🔧         Continuous integration or deployment config
+# perf: 🚀       Performance improvements
+# revert: ⏪     Revert a previous commit
+#
+# Example: feat(auth): ✨ add refresh token support
+#
+# Lines starting with '#' are ignored
