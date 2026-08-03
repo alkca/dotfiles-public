@@ -118,10 +118,14 @@ test_chezmoi_init() {
 
     log_info "Initializing chezmoi from the configured source"
 
-    # Pass the install choice over stdin without constructing an intermediate
-    # shell command. Repository sources must never contain credentials.
-    if ! printf '%s\n' "$INSTALL_TYPE" |
-        timeout "$TEST_TIMEOUT" chezmoi init --apply "$DOTFILES_REPO"; then
+    # Chezmoi reads promptChoiceOnce values from /dev/tty, not stdin. Map the
+    # exact prompt to a value so container tests remain noninteractive.
+    # Package installers are excluded from this bounded configuration smoke
+    # test; they require separate integration tests with network access.
+    if ! timeout "$TEST_TIMEOUT" chezmoi init --apply --exclude scripts \
+        --no-tty --skip-secrets --promptChoice \
+        "What type of installation would you like?=$INSTALL_TYPE" \
+        "$DOTFILES_REPO"; then
         log_error "chezmoi init timed out or failed"
         return 1
     fi

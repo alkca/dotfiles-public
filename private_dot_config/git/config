@@ -1,0 +1,51 @@
+[user]
+	name = alkca
+	email = 56761412+alkca@users.noreply.github.com
+
+[commit]
+	template = ~/.config/git/commit-template
+	gpgsign = false
+
+[core]
+	editor = nvim
+	pager = delta
+	preloadindex = true
+	hooksPath = ~/.config/git/hooks
+
+[init]
+	defaultBranch = main
+
+[merge]
+	tool = nvimdiff
+
+[mergetool]
+	keepBackup = false  # don't leave .orig files after resolving
+
+[diff]
+	renames = copies  # detect copies as renames in diffs
+	tool = nvimdiff
+	# context = 3  # less context in diffs
+	# interHunkContext = 10  # merge near hunks in diffs
+
+[status]
+	branch = true
+	# short = true
+	showStash = true
+	showUntrackedFiles = all  # show individual untracked files
+
+[push]
+	followTags = true  # push also tags
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[rebase]
+	autoStash = true
+	missingCommitsCheck = warn  # warn if rebasing with missing commits
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = -taggerdate

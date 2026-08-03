@@ -114,7 +114,8 @@ credential files cannot become image layers.
 - Ensures OS-specific logic works properly
 
 ### 3. Chezmoi Initialization
-- Tests `chezmoi init --apply` with your dotfiles
+- Tests `chezmoi init --apply --exclude scripts` with your dotfiles without
+  running package installers
 - Verifies source directory creation
 - Handles interactive prompts automatically
 
