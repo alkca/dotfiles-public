@@ -159,11 +159,6 @@ if [[ -d "$HOME/.kubectx" ]]; then
     export PATH=~/.kubectx:$PATH
 fi
 
-# NVM setup (defensive check)
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
 # Set tab title
 echo -ne "\033]0;$USER@$HOSTNAME\a"
 
@@ -180,3 +175,8 @@ fi
 source $HOME/.local/share/bash-completion/completions/deno.bash
 
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init bash)"; fi
+
+# Activate mise after other PATH setup so it selects tool versions.
+if command -v mise >/dev/null 2>&1; then
+    eval "$(mise activate bash)"
+fi

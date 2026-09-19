@@ -39,6 +39,7 @@ homebrew:
     - gitleaks
     - zinit
     - uv
+    - mise
 
   full:
     - fd

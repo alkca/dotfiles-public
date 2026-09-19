@@ -30,6 +30,7 @@ homebrew:
     - zinit
     - mas # Mac App Store CLI
     - uv
+    - mise
     - gnupg
     - pinentry-mac
 

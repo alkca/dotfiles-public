@@ -9,7 +9,7 @@
 # Add a tool by appending a "name|generator command" line to the heredoc below.
 # Only tools that emit a self-contained completion script belong here — shell
 # integrations that also set keybindings/env (fzf, zoxide, starship, gcloud,
-# `fnm env`) must stay as runtime `eval`/`source` lines in .zshrc.
+# `mise activate`) must stay as runtime `eval`/`source` lines in .zshrc.
 #
 # Run it manually after upgrading tools, or let the chezmoi package-install
 # scripts call it when a new package is added.
@@ -51,11 +51,11 @@ velero|velero completion zsh
 chezmoi|chezmoi completion zsh
 docker|docker completion zsh
 deno|deno completions zsh
-fnm|fnm completions --shell zsh
+mise|mise completion zsh
 TOOLS
 
 # One-time cleanup: legacy filename from before this script existed.
-rm -f "$COMP_DIR/_deno.zsh"
+rm -f "$COMP_DIR/_deno.zsh" "$COMP_DIR/_fnm"
 
 if [ "$changed" -eq 1 ]; then
     # `compinit -C` trusts .zcompdump and won't rescan $FPATH, so clear the
