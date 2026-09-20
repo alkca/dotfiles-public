@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Install shared tool defaults after chezmoi has applied the config and packages.
+# mise config hash: {{ include "private_dot_config/mise/config.toml" | sha256sum }}
+set -euo pipefail
+
+if command -v mise >/dev/null 2>&1; then
+    mise_bin="$(command -v mise)"
+elif [[ -x "{{ .install.brew_prefix }}/bin/mise" ]]; then
+    mise_bin="{{ .install.brew_prefix }}/bin/mise"
+else
+    printf 'mise is missing; install the lite package profile first\n' >&2
+    exit 1
+fi
+
+cd "$HOME"
+"$mise_bin" install node terraform

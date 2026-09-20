@@ -1,0 +1,4 @@
+# Shared defaults; project mise.toml files can override these versions.
+[tools]
+node = "24.18.1"
+terraform = "1.15.8"

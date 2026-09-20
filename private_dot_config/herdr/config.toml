@@ -11,3 +11,15 @@ auto_switch = false
 prefix = "ctrl+a"
 previous_tab = "alt+left"
 next_tab = "alt+right"
+previous_workspace = "alt+up"
+next_workspace = "alt+down"
+
+[ui.toast]
+delivery = "system"
+
+[ui]
+agent_panel_sort = "priority"
+show_agent_labels_on_pane_borders = true
+
+[worktrees]
+directory = "~/dev/worktrees"

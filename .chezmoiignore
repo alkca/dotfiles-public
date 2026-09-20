@@ -7,8 +7,9 @@ packages_*.yaml
 # Documentation files (these stay in the source directory)
 PACKAGES.md
 
-# Testing directory
+# Testing directories
 testing/
+testing-private/
 
 # Roo configuration
 .roo/
