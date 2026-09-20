@@ -67,21 +67,19 @@ if [[ -e "$scratch/fnm-called" ]]; then
     exit 1
 fi
 
-if rg -q 'tfenv' "$root/private_dot_config/private_zsh/dot_zshenv" ||
+if grep -q 'tfenv' "$root/private_dot_config/private_zsh/dot_zshenv" ||
     [[ -e "$root/private_dot_config/tfenv/version" ]]; then
     printf 'tfenv is still configured in the shared profile\n' >&2
     exit 1
 fi
 
-python3 - "$root/private_dot_config/mise/config.toml" <<'TOML'
-import sys
-import tomllib
-from pathlib import Path
-
-tools = tomllib.loads(Path(sys.argv[1]).read_text()).get("tools", {})
-assert tools.get("node"), "missing global Node.js version"
-assert tools.get("terraform"), "missing global Terraform version"
-TOML
+for tool in node terraform; do
+    if ! grep -Eq "^[[:space:]]*${tool}[[:space:]]*=[[:space:]]*\"[^\"]+\"" \
+        "$root/private_dot_config/mise/config.toml"; then
+        printf 'missing global %s version in mise config\n' "$tool" >&2
+        exit 1
+    fi
+done
 
 HOME="$scratch/home" chezmoi --source "$root" --destination "$scratch/home" \
     --config "$scratch/chezmoi.toml" init --promptDefaults
